@@ -28,216 +28,38 @@
 #include <vector>
 
 
-class FoxSequence
+class AdditionGame
 {
  public:
-  enum State{kIncrease_1=0, kDecrease_1, kStay, kIncrease_2, kDecrease_2, kError};
-
-  std::string isValid(const std::vector<int>& seq)
-  {
-    // that 0 < a < b <= c < d < N-1  
-    State state = kIncrease_1;
-    int common_difference = 0;
-    int prev_value = seq[0];
-    bool result = false;
-
-    for (int i=1; i<seq.size();)
-    {
-      int cur_value = seq[i];
-      int cur_diff = cur_value - prev_value;
-      State old_state = state;
-
-      switch(state)
+   int getMaximumPoints(int A, int B, int C, int N)
+   {
+      int max_points = 0;
+      std::vector<int> points;
+      points.push_back(A);
+      points.push_back(B);
+      points.push_back(C);
+      for (int i=0; i<N; ++i)
       {
-        case kIncrease_1:
-          result = process_sequence_increase_1(cur_value, prev_value, cur_diff, &common_difference, &state);
-          break;
-        case kDecrease_1:
-          result = process_sequence_decrease_1(cur_value, prev_value, cur_diff, &common_difference, &state);
-          break;
-        case kStay:
-          result = process_sequence_stey(cur_value, prev_value, cur_diff, &common_difference, &state);
-          break;
-        case kIncrease_2:
-          result = process_sequence_increase_1(cur_value, prev_value, cur_diff, &common_difference, &state);
-          break;
-        case kDecrease_2:
-          result = process_sequence_decrease_1(cur_value, prev_value, cur_diff, &common_difference, &state);
-          if (result == true && state == kError) result = false;
-          break;
-      };
-
-      if (old_state == state)
-      {
-        prev_value = seq[i];
-        i++;
+        std::vector<int>::iterator max_itr = std::max_element(points.begin(), points.end());
+        if (*max_itr <= 0) break;
+        max_points += *max_itr;
+        --(*max_itr);
       }
-
-
-      if (false == result ||
-          state == kError)
-      {
-        std::cout << "i:" << i << ", old_state:" << old_state << ", state:" << state;
-        break;
-      }
-    }
-
-    if (false == result ||
-        state == kError)
-      return "NO";
-
-    return "YES";
-  }
-
- private:
-  bool process_sequence_increase_1(int cur_value, int prev_value, int cur_diff, int* common_difference, State* next_state)
-  {
-    if (*common_difference == 0)
-    {
-      *common_difference = cur_diff;
-      if (*common_difference <= 0)
-        return false; 
-      return true;
-    }
-
-    if (cur_diff == 0 ||
-        (cur_diff > 0 && *common_difference != cur_diff) )
-      return false ;
-    if (cur_diff < 0)
-      if (false == go_next_state(next_state, common_difference))
-        return false;
-    return true;
-  }
-
-  bool process_sequence_decrease_1(int cur_value, int prev_value, int cur_diff, int* common_difference, State* next_state)
-  {
-    if (*common_difference == 0)
-    {
-      *common_difference = cur_diff;
-      if (*common_difference >= 0)
-        return false; 
-      return true;
-    }
-
-    if (cur_diff < 0 && *common_difference != cur_diff)
-      return false ;
-    if (cur_diff >= 0)
-      if (false == go_next_state(next_state, common_difference))
-        return false;
-
-    return true;
-  }
-
-  bool process_sequence_stey(int cur_value, int prev_value, int cur_diff, int* common_difference, State* next_state)
-  {
-    if (cur_diff < 0) 
-      return false;
-    if (cur_diff == 0) return true;
-
-    if (false == go_next_state(next_state, common_difference)) 
-      return false;
-    return true;
-  }
-
-  bool go_next_state(State* next_state, int* common_difference)
-  {
-    *next_state = (State)((int)(*next_state) + 1);
-    if (*next_state >= kError) 
-      return false;
-    *common_difference = 0;
-    return true;
-  }
-
+      return max_points;
+   }
 };
 
 
 int main(int argc, const char *argv[])
 {
-	FoxSequence fs;
+	AdditionGame a;
 	
-	std::vector<int> v;
+	std::cout << a.getMaximumPoints(3,4,5,3) << " == 13" << std::endl;
+	std::cout << a.getMaximumPoints(1,1,1,8) << " == 3" << std::endl;
+	std::cout << a.getMaximumPoints(3,4,48,40) << " == 1140" << std::endl;
+	std::cout << a.getMaximumPoints(36,36,36,13) << " == 446" << std::endl;
+	std::cout << a.getMaximumPoints(8,2,6,13) << " == 57" << std::endl;
 
-	v.push_back(1);
-	v.push_back(3);
-	v.push_back(5);
-	v.push_back(7);
-	v.push_back(5);
-	v.push_back(3);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(3);
-	v.push_back(5);
-	v.push_back(7);
-	v.push_back(5);
-	v.push_back(3);
-	v.push_back(1);
-	std::cout << fs.isValid(v) << " == YES" << std::endl;
-
-	v.clear();
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(5);
-	v.push_back(4);
-	v.push_back(3);
-	v.push_back(2);
-	v.push_back(2);
-	v.push_back(2);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(5);
-	v.push_back(6);
-	v.push_back(4);
-	std::cout << fs.isValid(v) << " == YES" << std::endl;
-
-	v.clear();
-	v.push_back(3);
-	v.push_back(6);
-	v.push_back(9);
-	v.push_back(1);
-	v.push_back(9);
-	v.push_back(5);
-	v.push_back(1);
-	std::cout << fs.isValid(v) << " == YES" << std::endl;
-
-	v.clear();
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(3);
-	v.push_back(2);
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(3);
-	v.push_back(2);
-	v.push_back(1);
-	v.push_back(2);
-	v.push_back(3);
-	v.push_back(2);
-	v.push_back(1);
-	std::cout << fs.isValid(v) << " == NO" << std::endl;
-
-	v.clear();
-	v.push_back(1);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(3);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(1);
-	v.push_back(3);
-	v.push_back(4);
-	v.push_back(3);
-	v.push_back(1);
-	std::cout << fs.isValid(v) << " == NO" << std::endl;
-
-	v.clear();
-	v.push_back(6);
-	v.push_back(1);
-	v.push_back(6);
-	std::cout << fs.isValid(v) << " == NO" << std::endl;
 
   return 0;
 }
