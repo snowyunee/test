@@ -28,142 +28,88 @@
 #include <vector>
 
 
-class MakeSquare
+void print_vec(const std::vector<int>& r)
+{
+  for (size_t i=0; i<r.size(); ++i)
+  {
+    std::cout << r[i] << ",";
+  }
+  std::cout << std::endl;
+}
+
+class PermutationSignature
 {
  public:
-   int minChanges(std::string s)
-   {
-     int n = s.size();
-     if (n <= 1)
-       return 0;
+  std::vector<int> reconstruct(std::string signature)
+  {
+    if (signature.size() < 1) return std::vector<int>();
 
-     if (n == 2)
-     {
-       if (s.at(0) == s.at(1))
-         return 0;
-       else
-         return 1;
-     }
+    std::vector<int> result(signature.size()+1);
+    result[0] = 1;
+    int result_index = 1;
+    int min = 1;
+    for (char& a : signature)
+    {
+      switch(a)
+      {
+        case '|': result[result_index] = result[result_index-1] + 1; break;
+        case 'D': result[result_index] = result[result_index-1] - 1; break;
+      };
+      min = std::min(result[result_index], min);
+      ++result_index;
+      std::cout << ", a---:" << a;
+    }
 
-     // write which index each alphabet comes up.
-     std::vector<std::vector<int> > alphabet_appear('z'+'a');
-     for (int i = 0; i < n; ++i)
-     {
-       alphabet_appear[(int)s.at(i)].push_back(i);
-     }
+    int diff = 1 - min;
+    //std::cout << min << ", " << diff << std::endl;
+    std::vector<int> count(result.size());
+    for (size_t i = 0; i < result.size(); ++i)
+    {
+      result[i] += diff;
+      ++count[result[i]];
+    }
 
-     std::vector<std::vector<int> > s_appear(n);
-     for (int i = 0; i < n; ++i)
-     {
-       if (alphabet_appear[(int)s.at(i)].size() > 0)
-       {
-         s_appear[i] = alphabet_appear[(int)s.at(i)];
-         // don't choose
-         s_appear[i].push_back(-1);
-       }
-       else
-       {
-         // don't choose
-         s_appear[i].push_back(-1);
-       }
-     }
+    std::vector<int> will_come_count(count);
+    std::cout << "will come:";
+    print_vec(will_come_count);
 
-     std::vector<int> case_count(n + 1);
-     case_count[n] = 1;
-     for (int split_point = n - 1; split_point >= 1; --split_point)
-     {
-       case_count[split_point] = case_count[split_point + 1] * s_appear[split_point].size();
-       std::cout << "split_point:" << split_point << ", case_count:" << case_count[split_point] << std::endl;
-     }
+    std::cout << "result i" ;
+    for (size_t i = 0; i < result.size(); ++i)
+    {
+      std::cout << "result i" << result[i];
+      result[i] += count[result[i]] - will_come_count[result[i]];
+      --will_come_count[result[i]];
+    }
 
-     int min_cost=n;
-     for (int split_point=1; split_point<n-1; ++split_point)
-     {
-       int choosable_min=0;
-       int choosable_max=split_point;
-       for (int case_index=0; case_index < case_count[split_point]; ++case_index)
-       {
-         int total_cost = 0;
-         int prev_left_match_index = -1;
-         int prev_right_match_index = split_point-1;
-         int current_case = case_index;
-         std::vector<int> match_index(n);
+    std::cout << "will come:"; print_vec(will_come_count); 
 
-         // make matches in order
-         for (int right_current = split_point; right_current < n-1; ++right_current)
-         {
-           int alphabet_appear = current_case / case_count[right_current + 1];
-           current_case %= case_count[right_current + 1];
-
-           match_index[right_current] = alphabet_appear;
-
-           // no match
-           if (alphabet_appear < 0) 
-             continue;
-
-           int left_match_index = s_appear[right_current][alphabet_appear];
-
-           // no match
-           if (left_match_index < choosable_min || left_match_index >= choosable_max)
-             continue;
-
-           int cost = std::max((left_match_index - prev_left_match_index -1),
-                               (right_current - prev_right_match_index - 1));
-
-           if (cost < 0)
-           {
-             std::cout << "left:" << left_match_index - prev_left_match_index -1
-                 << ", " << left_match_index << ", " << prev_left_match_index
-                 << ", right:" << right_current - prev_right_match_index - 1
-                 << ", " << right_current << ", " << prev_right_match_index << std::endl;
-             assert(0);
-           }
-
-           total_cost += (cost > 0) ? cost : 0;
-
-           std::cout << s << ", split_point:" << split_point
-               << ", match : " << left_match_index << ", " << right_current 
-               << ", prev : " << prev_left_match_index << ", " << prev_right_match_index
-               << ", cost:" << cost
-               << ", tatal_cost:" << total_cost << std::endl;
-
-           choosable_min = left_match_index + 1;
-           prev_left_match_index = left_match_index;
-           prev_right_match_index = right_current;
-         }
-
-         int cost = std::max(choosable_max - 1 - prev_left_match_index -1,
-                             n - 1 - prev_right_match_index - 1);
-         if (cost < 0)
-         {
-           std::cout << "left:" << choosable_max - 1 - prev_left_match_index -1
-               << ", right:" << n - 1 - prev_right_match_index - 1;
-           assert(0);
-         }
-         total_cost += (cost > 0) ? cost : 0;
-
-         if (total_cost < min_cost)
-           min_cost = total_cost;
-
-           //std::cout << s << ", tatal_cost:" << total_cost << std::endl;
-       }
-
-     }
-     return min_cost;
-   }
+    return result;
+  }
 };
 
 
 int main(int argc, const char *argv[])
 {
-	MakeSquare a;
+	PermutationSignature a;
 	
-	//std::cout << a.minChanges("abcdabgcd") << " == 1" << std::endl;
-	//std::cout << a.minChanges("abcdeabce") << " == 1" << std::endl;
-	//std::cout << a.minChanges("abcdeabxde") << " == 1" << std::endl;
-	std::cout << a.minChanges("aabcaabc") << " == 0" << std::endl;
-	//std::cout << a.minChanges("aaaaabaaaaabaaaaa") << " == 2" << std::endl;
+  std::vector<int> r;
 
+  std::cout << "result i---";
+  r = a.reconstruct("|||||");
+  print_vec(r);
+  std::cout << " == 1,2,3,4,5,6" << std::endl;
+
+  r = a.reconstruct("D|");
+  print_vec(r);
+	std::cout << " == 2,1,3" << std::endl;
+
+  r = a.reconstruct("||||D");
+  print_vec(r);
+	std::cout << " == 1,2,3,4,6,5" << std::endl;
+
+  r = a.reconstruct("D||D|D");
+  print_vec(r);
+	std::cout << " == 2,1,3,5,4,7,6" << std::endl;
 
   return 0;
 }
