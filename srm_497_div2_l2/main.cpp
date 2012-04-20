@@ -57,33 +57,28 @@ class PermutationSignature
       };
       min = std::min(result[result_index], min);
       ++result_index;
+      std::cout << ", a---:" << a;
     }
 
     int diff = 1 - min;
     //std::cout << min << ", " << diff << std::endl;
-    std::vector<int> count(result.size()+1);
+    std::vector<int> count(result.size());
     for (size_t i = 0; i < result.size(); ++i)
     {
       result[i] += diff;
       ++count[result[i]];
     }
 
-    int base = 0;
-    for (size_t i = 0; i < count.size(); ++i)
-    {
-      int old_count = count[i];
-      count[i] = count[i] + base;
-      base += old_count - 1;
-    }
-
     std::vector<int> will_come_count(count);
+    std::cout << "will come:";
+    print_vec(will_come_count);
 
-    std::cout << "will come:"; print_vec(will_come_count); 
+    std::cout << "result i" ;
     for (size_t i = 0; i < result.size(); ++i)
     {
-      int temp = result[i];
-      result[i] += count[temp] - will_come_count[temp];
-      --will_come_count[temp];
+      std::cout << "result i" << result[i];
+      result[i] += count[result[i]] - will_come_count[result[i]];
+      --will_come_count[result[i]];
     }
 
     std::cout << "will come:"; print_vec(will_come_count); 
@@ -99,6 +94,7 @@ int main(int argc, const char *argv[])
 	
   std::vector<int> r;
 
+  std::cout << "result i---";
   r = a.reconstruct("|||||");
   print_vec(r);
   std::cout << " == 1,2,3,4,5,6" << std::endl;
