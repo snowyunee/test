@@ -16,15 +16,15 @@ public:
 			int64_t add=0;
 			int64_t mul=1;
 			if(false == getTotalExceptOne(one, seq.begin(), seq.end(), add, mul))
-				return "No";	// overflow
+				continue;
 
 			if(mul <= 1)	// 이런 경우는 없다.
-				return "No";
+				continue;
 
 			if((add % (mul - 1)) == 0)
 			{
 				if(one == (add / (mul - 1))) // 못 바꾸는 경우
-					return "No";
+					continue;
 
 			   	return "Yes";
 			}
@@ -43,11 +43,10 @@ public:
 				is_skiped = true;
 				continue;
 			}
-			int64_t old_mul = mul;
 			add += *i;
 			mul *= *i;
 
-			if(mul < old_mul)
+			if(mul >= (int64_t(65536)*int64_t(65536)))
 			   	return false;
 		}
 		return true;
