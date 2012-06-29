@@ -4,51 +4,26 @@
 #include <iostream>
 #include <boost/iterator/counting_iterator.hpp>
 
-class PerfectSequences
+class SlimeXSlimesCity
 {
 public:
-	std::string fixIt(std::vector<int> seq)
+	int merge(std::vector<int> population)
 	{
-		if(seq.size() <= 1) return "Yes";
-
-		for(int one : seq)
+		std::sort(population.begin(), population.end());
+		std::vector<int64_t> acc(population.size());
+		acc[0] = population[0];
+		for (size_t i = 1; i < population.size(); ++i)
 		{
-			int64_t add=0;
-			int64_t mul=1;
-			if(false == getTotalExceptOne(one, seq.begin(), seq.end(), add, mul))
-				continue;
-
-			if(mul <= 1)	// 이런 경우는 없다.
-				continue;
-
-			if((add % (mul - 1)) == 0)
-			{
-				if(one == (add / (mul - 1))) // 못 바꾸는 경우
-					continue;
-
-			   	return "Yes";
-			}
+			acc[i] += acc[i-1] + population[i];
 		}
-		return "No";
-	}
-	bool getTotalExceptOne(int except_one, std::vector<int>::iterator begin,
-			std::vector<int>::iterator end,
-			int64_t& add, int64_t& mul)
-	{
-		bool is_skiped = false;
-		for(auto i=begin; i!=end; ++i)
+		//std::partial_sum(population.begin(), population.end(), acc.begin());
+		int count = 1;
+		for (auto i=population.size()-1; i > 0; --i)
 		{
-			if(is_skiped == false && except_one == *i)
-			{
-				is_skiped = true;
-				continue;
-			}
-			add += *i;
-			mul *= *i;
-
-			if(mul >= (int64_t(65536)*int64_t(65536)))
-			   	return false;
+			if (population[i] > acc[i-1])
+			   	break;
+			++count;
 		}
-		return true;
+		return count;
 	}
 };
